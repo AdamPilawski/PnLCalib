@@ -1,3 +1,4 @@
+import cv2
 import copy
 import torch
 import numpy as np
@@ -11,7 +12,8 @@ def generate_gaussian_matrix_vectorized(h, w, px, py, sigma=2):
     x, y = np.meshgrid(np.arange(h), np.arange(w))
 
     # Calculate Gaussian values for the entire grid
-    matrix = np.exp(-((x - px)**2 + (y - py)**2) / (2 * sigma**2))
+    array = (-((x - px)**2 + (y - py)**2) / (2 * sigma**2)).astype(float)
+    matrix = np.exp(array)
 
     return matrix
 
@@ -140,11 +142,95 @@ def generate_gaussian_array_vectorized_l(num_matrices, keypoints, original_size,
     return matrices_combined
 
 
+
+def generate_gaussian_array_vectorized_dist_l(num_matrices,
+                                              keypoints,
+                                              lines_aux,
+                                              original_size,
+                                              img_original_size,
+                                              calibration,
+                                              down_ratio=2, sigma=2, sigma_mult=1):
+    """
+    Generate vectorized array with distortion information
+    """
+    def sigma_f(px, py, size, sigma):
+        #multiply sigma if point in image border
+        if (px < 5 or px > size[0] - 5) | (py < 5 or py > size[1] - 5):
+            return sigma_mult*sigma
+        else:
+            return sigma
+
+
+    def project_points(point, calibration, size, orig_size):
+        K, R, t, dist = calibration
+        img_point, _ = cv2.projectPoints(point, R, t, K, dist)
+        img_point = img_point[0][0]
+        img_point[0] *= size[0] / orig_size[0]
+        img_point[1] *= size[1] / orig_size[1]
+
+        return img_point
+
+
+    new_size = tuple(int(ti / down_ratio) for ti in original_size)
+    resized_keypoints = resize_keypoints_l(keypoints, original_size, new_size)
+
+    # Create an array of center points based on resized keypoints for both points
+    center_points = []
+
+    for kp in range(1, num_matrices+1):
+        if kp in resized_keypoints.keys():
+            center_points.append([resized_keypoints[kp]['x_1'], resized_keypoints[kp]['y_1']])
+            center_points.append([resized_keypoints[kp]['x_2'], resized_keypoints[kp]['y_2']])
+
+        else:
+            center_points.append([np.inf, np.inf])
+            center_points.append([np.inf, np.inf])
+
+    center_points = np.array(center_points)
+
+    # Generate Gaussian matrices for both points and sum them
+    matrices1 = [generate_gaussian_matrix_vectorized(new_size[0], new_size[1], px, py, sigma_f(px, py, new_size, sigma)) for px, py in
+                 center_points[::2]]
+    matrices2 = [generate_gaussian_matrix_vectorized(new_size[0], new_size[1], px, py, sigma_f(px, py, new_size, sigma)) for px, py in
+                 center_points[1::2]]
+    matrices = np.array(matrices1) + np.array(matrices2)
+
+    matrices_border = np.zeros((1, new_size[1], new_size[0]))
+
+    for line in lines_aux.keys():
+        w_kp1, w_kp2 = lines_aux[line]["pt1"], lines_aux[line]["pt2"]
+        img_kp1 = project_points(w_kp1, calibration, new_size, img_original_size)
+        img_kp2 = project_points(w_kp2, calibration, new_size, img_original_size)
+
+        pixel_dist = np.linalg.norm(img_kp2 -img_kp1)
+        num_gaussians = int(pixel_dist / (sigma))
+
+        if num_gaussians != 1:
+            t_values = np.linspace(0, 1, num_gaussians)
+            interpolated_points = np.array([w_kp1 + t * (w_kp2 - w_kp1) for t in t_values])
+            for w_kp in interpolated_points:
+                img_kp = project_points(w_kp, calibration, new_size, img_original_size)
+                x, y = img_kp[0], img_kp[1]
+                matrices_border[0, :, :] += generate_gaussian_matrix_vectorized(new_size[0], new_size[1], x, y, sigma)
+
+        else:
+            x, y = abs(img_kp2[0] - img_kp1[0]) / 2, abs(img_kp2[1] - img_kp1[1]) / 2
+            matrices_border[0, :, :] += generate_gaussian_matrix_vectorized(new_size[0], new_size[1], x, y, sigma)
+
+
+    matrices_border = np.clip(matrices_border, 0, 1)
+
+    matrices_combined = np.concatenate((matrices, matrices_border), axis=0)
+
+    return matrices_combined
+
+
+
 def get_keypoints_from_heatmap_batch_maxpool(
         heatmap: torch.Tensor,
         scale: int = 2,
         max_keypoints: int = 1,
-        min_keypoint_pixel_distance: int = 15,
+        min_keypoint_pixel_distance: int = 1,
         return_scores: bool = True,
 ) -> List[List[List[Tuple[int, int]]]]:
     """Fast extraction of keypoints from a batch of heatmaps using maxpooling.
@@ -215,7 +301,7 @@ def get_keypoints_from_heatmap_batch_maxpool_l(
         heatmap: torch.Tensor,
         scale: int = 2,
         max_keypoints: int = 2,
-        min_keypoint_pixel_distance: int = 10,
+        min_keypoint_pixel_distance: int = 1,
         return_scores: bool = True,
 ) -> List[List[List[Tuple[int, int]]]]:
     """Fast extraction of keypoints from a batch of heatmaps using maxpooling.

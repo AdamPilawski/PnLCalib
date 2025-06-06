@@ -14,6 +14,7 @@ from PIL import Image
 
 from utils.utils_keypoints import KeypointsDB
 from utils.utils_keypointsWC import KeypointsWCDB
+from utils.utils_keypointsWP import KeypointsWP
 
 
 class SoccerNetCalibrationDataset(Dataset):
@@ -217,3 +218,47 @@ class TSWorldCupDataset(Dataset):
         homography = torch.from_numpy(homography)
         homography = homography / homography[2:3, 2:3]
         return homography
+
+
+
+class WorldPoseDataset(Dataset):
+    def __init__(self, root_dir, split, transform):
+        self.root_dir = root_dir
+        self.split = split
+        self.transform = transform
+        assert self.split in ['train', 'val'], f'unknown dataset type {self.split}'
+
+        self.files = glob.glob(os.path.join(self.root_dir + self.split, "*.jpg"))
+        self.num_samples = len(self.files)
+
+        self.files.sort()
+
+    def __len__(self):
+        return self.num_samples
+
+    def __getitem__(self, idx):
+        image, image_name = self.get_image_by_index(idx)
+        calibration = self.get_calibration_from_name(image_name)
+        img_db = KeypointsWP(calibration, (1920, 1080), (960, 540))
+        target, mask = img_db.get_tensor_w_mask()
+
+        sample = self.transform({'image': image, 'target': target, 'mask': mask})
+
+        return sample['image'], sample['target'], sample['mask']
+
+
+    def get_image_by_index(self, index):
+        img_file = self.files[index]
+        image = Image.open(img_file)
+        return image, img_file
+
+    def get_calibration_from_name(self, name):
+        team1, team2, timestamp, frame_num = name.split(".")[0].split("/")[-1].split("_")
+        seq = f"{team1}_{team2}_{timestamp}"
+        camera = np.load(self.root_dir + "cameras/" + seq + ".npz")
+        dist, K, R, t = camera["k"][int(frame_num)], camera["K"][int(frame_num)], camera["R"][int(frame_num)], \
+                         camera["t"][int(frame_num)]
+        return K, R, t, dist
+
+
+
