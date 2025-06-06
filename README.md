@@ -188,16 +188,10 @@ pip install -r requirements.txt
 
 ## Citation
 ```shell
-@misc{gutiérrezpérez2024pnlcalibsportsfieldregistration,
-      title={PnLCalib: Sports Field Registration via Points and Lines Optimization}, 
-      author={Marc Gutiérrez-Pérez and Antonio Agudo},
-      year={2024},
-      eprint={2404.08401},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2404.08401}, 
+@article{gutierrez4998149pnlcalib,
+  title={Pnlcalib: Sports Field Registration Via Points and Lines Optimization},
+  author={Guti{\'e}rrez-P{\'e}rez, Marc and Agudo, Antonio},
+  journal={Available at SSRN 4998149}
 }
 ```
-
-<hr>
 
