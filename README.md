@@ -62,8 +62,8 @@ Single-View
 |Lines| WC14 | [**SV_FT_WC14_lines**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_FT_WC14_lines) |
 |Keypoints| TSWC | [**SV_FT_TSWC_kp**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_FT_TSWC_kp) |
 |Lines| TSWC | [**SV_FT_TSWC_lines**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_FT_TSWC_lines) |
-|Keypoints | WorldPose | [**SV_FT_WP_kp**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_WP_kp) |
-|Keypoints | WorldPose | [**SV_FT_WP_lines**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_WP_lines) |
+|Keypoints| WorldPose | [**SV_FT_WP_kp**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_WP_kp) |
+|Lines| WorldPose | [**SV_FT_WP_lines**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_WP_lines) |
 
 Multiple-View
 | Model | Finetuned | Link |
