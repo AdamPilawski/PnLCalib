@@ -9,6 +9,12 @@ Extension of the previous paper "No Bells, Just Whistles: Sports Field Registrat
 <p align="center"><img src=figures/FieldReconstruction-1.png  width=70% height=70%></p>
 </div>
 
+### 🚀 Updates (06/06/2025)
+
+- ✅ **Support for Distributed GPU Training** for scalable model training across multiple devices.
+
+- ✅ **Integration of the WorldPose Dataset** as an additional benchmark for training and evaluation.
+
 ### 🚀 Key Features
 
 - **Improved Keypoint and Line Detection**  
