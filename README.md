@@ -9,6 +9,12 @@ Extension of the previous paper "No Bells, Just Whistles: Sports Field Registrat
 <p align="center"><img src=figures/FieldReconstruction-1.png  width=70% height=70%></p>
 </div>
 
+### 🚀 Updates (06/06/2025)
+
+- ✅ **Support for Distributed GPU Training** for scalable model training across multiple devices.
+
+- ✅ **Integration of the WorldPose Dataset** as an additional benchmark for training and evaluation.
+
 ### 🚀 Key Features
 
 - **Improved Keypoint and Line Detection**  
@@ -56,6 +62,8 @@ Single-View
 |Lines| WC14 | [**SV_FT_WC14_lines**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_FT_WC14_lines) |
 |Keypoints| TSWC | [**SV_FT_TSWC_kp**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_FT_TSWC_kp) |
 |Lines| TSWC | [**SV_FT_TSWC_lines**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_FT_TSWC_lines) |
+|Keypoints| WorldPose | [**SV_FT_WP_kp**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_WP_kp) |
+|Lines| WorldPose | [**SV_FT_WP_lines**](https://github.com/mguti97/PnLCalib/releases/download/v1.0.0/SV_WP_lines) |
 
 Multiple-View
 | Model | Finetuned | Link |
